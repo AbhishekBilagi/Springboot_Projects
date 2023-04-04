@@ -1,0 +1,158 @@
+package com.foodcenter.controller;
+
+import java.util.List;
+import java.util.Objects;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.foodcenter.DTO.UserDTO;
+import com.foodcenter.exception.ApplicationException;
+import com.foodcenter.model.Login;
+import com.foodcenter.model.PasswordEncrypt;
+import com.foodcenter.model.ResponseMessage;
+import com.foodcenter.model.User;
+import com.foodcenter.service.UserService;
+import com.foodcenter.util.Jwtutil;
+
+@RestController
+@RequestMapping("/api")
+@CrossOrigin(value = "http://localhost:4200")
+public class UserController {
+	@Autowired
+	private UserService service;
+
+	@PostMapping("/users")
+	public ResponseMessage saveUser(@RequestBody @Valid User user, BindingResult bindingResult) {
+
+		ResponseMessage response = new ResponseMessage();
+		System.out.println("Welcome");
+		User saveuser = service.save(user);
+
+		response.setStatus("Success");
+		response.setMessage("Employee created Successfully");
+		System.out.println(response.getStatus() + " " + response.getMessage());
+		return response;
+
+//		if (bindingResult.hasErrors()) {
+//			// throw validation exception
+//			ResponseMessage response = new ResponseMessage();
+//			response.setStatus("Failure");
+//			StringBuilder errorMsg = new StringBuilder();
+//			for (ObjectError error : bindingResult.getAllErrors()) {
+//				errorMsg.append(error.getDefaultMessage());
+//				errorMsg.append(" ");
+//			}
+//			response.setMessage("Validation Error: " + errorMsg);
+//			return response;
+//		} else {
+//			ResponseMessage response = new ResponseMessage();
+//			User saveuser = service.save(user);
+//			response.setStatus("Success");
+//			response.setMessage("Employee created Successfully");
+//			return response;
+//		}
+
+	}
+
+	@GetMapping("/users")
+	public ResponseEntity<List<User>> getUser() throws ApplicationException {
+
+		return ResponseEntity.ok().body(service.getUser());
+
+	}
+
+	@PostMapping("/users/login")
+	public ResponseMessage userLogin(@RequestBody Login login) {
+
+		System.out.println(login);
+		Jwtutil jwtUtil = new Jwtutil();
+		ResponseMessage response = new ResponseMessage();
+
+		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+		User user = service.findByEmail(login.getEmail());
+		if (user != null) {
+			// Checking encrypting password
+			if (passwordEncoder.matches(login.getPassword(), user.getPassword())) {
+				String token = jwtUtil.generateToken(user.getEmail());
+				response.setStatus("success");
+				response.setMessage("Email :" + user.getEmail());
+				System.out.println("Token: " + token);
+			}
+			 else {
+					response.setStatus("failure");
+					response.setMessage("you have entered wrong password");
+				}
+		} else {
+			response.setStatus("failure");
+			response.setMessage("User not found");
+		}
+
+		return response;
+
+	}
+
+//	@GetMapping("/mail")
+//	public String mailSend() {
+//		String toMail = "abhishekbilagi28@gmail.com";
+//		String body = "Hi welcome to springboot application";
+//		String subject = "Demo Mail";
+//		String s = service.sendMail(toMail, body, subject);
+//		return s;
+//	}
+
+	@PostMapping("users/genrateOTP")
+	public String genrateOTP(@RequestBody User user) {
+		
+		System.out.println(user.getEmail());
+		String s=service.genrateOTP(user.getEmail());
+		System.out.println(s);
+		return s;
+	}
+	@PostMapping("/verifyEmail")
+	public String verifyEmail(@RequestBody  UserDTO userDTO) {
+		System.out.println(userDTO);
+		System.out.println("OTP"+userDTO.getOTP());
+		String s=service.verifyEmail(userDTO.getOTP());
+	
+		return s;
+	}
+	@PostMapping("/changePassword")
+	public String changePassword(@RequestBody User user) {
+		
+		String s=service.newPassword(user.getPassword());
+	
+		return s;
+	}
+
+	// Validation Exception handling
+	@ExceptionHandler(ConstraintViolationException.class)
+	public ResponseEntity<ResponseMessage> handleValidationException(ConstraintViolationException e) {
+		ResponseMessage response = new ResponseMessage();
+
+		for (ConstraintViolation error : e.getConstraintViolations()) {
+			response.setStatus("Failure");
+			response.setMessage("Validation Error: " + error.getMessage());
+		}
+
+		return ResponseEntity.internalServerError().body(response);
+	}
+
+}

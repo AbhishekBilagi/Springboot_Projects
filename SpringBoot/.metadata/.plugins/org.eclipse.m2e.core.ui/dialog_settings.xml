@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="org.eclipse.m2e.core.pom.overview">
+	</section>
+	<section name="org.eclipse.m2e.core.pom.dependencies">
+	</section>
+	<section name="MavenProjectImportWizardPage">
+		<list key="rootDirectory">
+			<item value="C:\Users\Miles\Desktop\sravanasir\ff13_javafullstack\labs\sboot\empapp-sboot-rest"/>
+			<item value="C:\Users\Miles\Desktop\sravanasir\futurense_java-fullstack\labs\examples\spring-boot-core-examples"/>
+			<item value="C:\Users\Miles\Desktop\sravanasir\futurense_java-fullstack\labs\examples\employee-mgmt-sboot-rest"/>
+			<item value="C:\Users\Miles\Desktop\sravanasir\futurense_java-fullstack\labs\examples\employee-mgmt-spring-boot"/>
+			<item value="C:\Users\Miles\Desktop\sravanasir\futurense_java-fullstack-main\futurense_java-fullstack-main\labs\examples\spring-boot-mvc-examples"/>
+		</list>
+		<list key="projectNameTemplate">
+			<item value="[artifactId]"/>
+			<item value="[artifactId]-TRUNK"/>
+			<item value="[artifactId]-[version]"/>
+			<item value="[groupId].[artifactId]"/>
+			<item value="[groupId].[artifactId]-[version]"/>
+			<item value="[name]"/>
+		</list>
+	</section>
+</section>
